@@ -7,51 +7,112 @@ export class StringArrayName implements Name {
     protected components: string[] = [];
 
     constructor(source: string[], delimiter?: string) {
-        throw new Error("needs implementation or deletion");
+        this.delimiter = delimiter ?? DEFAULT_DELIMITER;
+
+        this.components = source.map(raw => {
+            return raw
+                .replace(/\\/g, "\\\\")
+                .replace(new RegExp(`\\${this.delimiter}`, "g"), `\\${this.delimiter}`);
+        });
     }
 
     public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
+        return this.components
+            .map(masked => {
+                let result = "";
+                let escape = false;
+                for (const ch of masked) {
+                    if (!escape) {
+                        if (ch === ESCAPE_CHARACTER) escape = true;
+                        else result += ch;
+                    } else {
+                        result += ch;
+                        escape = false;
+                    }
+                }
+                return result;
+            })
+            .join(delimiter);
     }
 
     public asDataString(): string {
-        throw new Error("needs implementation or deletion");
+        return this.components
+            .map(masked => {
+                let unmasked = "";
+                let escape = false;
+                for (const ch of masked) {
+                    if (!escape) {
+                        if (ch === ESCAPE_CHARACTER) escape = true;
+                        else unmasked += ch;
+                    } else {
+                        unmasked += ch;
+                        escape = false;
+                    }
+                }
+
+                return unmasked
+                    .replace(/\\/g, "\\\\")
+                    .replace(new RegExp(`\\${DEFAULT_DELIMITER}`, "g"), `\\${DEFAULT_DELIMITER}`);
+            })
+            .join(DEFAULT_DELIMITER);
     }
 
     public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
+        return this.delimiter;
     }
 
     public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
+        return this.components.length === 0;
     }
 
     public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
+        return this.components.length;
     }
 
     public getComponent(i: number): string {
-        throw new Error("needs implementation or deletion");
+        let masked = this.components[i];
+        let result = "";
+        let escape = false;
+
+        for (const ch of masked) {
+            if (!escape) {
+                if (ch === ESCAPE_CHARACTER) escape = true;
+                else result += ch;
+            } else {
+                result += ch;
+                escape = false;
+            }
+        }
+        return result;
     }
 
     public setComponent(i: number, c: string): void {
-        throw new Error("needs implementation or deletion");
+        this.components[i] =
+            c.replace(/\\/g, "\\\\")
+             .replace(new RegExp(`\\${this.delimiter}`, "g"), `\\${this.delimiter}`);
     }
 
     public insert(i: number, c: string): void {
-        throw new Error("needs implementation or deletion");
+        this.components.splice(
+            i,
+            0,
+            c.replace(/\\/g, "\\\\")
+             .replace(new RegExp(`\\${this.delimiter}`, "g"), `\\${this.delimiter}`)
+        );
     }
 
     public append(c: string): void {
-        throw new Error("needs implementation or deletion");
+        this.insert(this.components.length, c);
     }
 
     public remove(i: number): void {
-        throw new Error("needs implementation or deletion");
+        this.components.splice(i, 1);
     }
 
     public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
+        for (let i = 0; i < other.getNoComponents(); i++) {
+            this.append(other.getComponent(i));
+        }
     }
 
 }
