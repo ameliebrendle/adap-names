@@ -57,7 +57,19 @@ export class Node {
      * @param bn basename of node being searched for
      */
     public findNodes(bn: string): Set<Node> {
-        throw new Error("needs implementation or deletion");
-    }
+        const result = new Set<Node>();
 
+        if (this.getBaseName() === bn) {
+            result.add(this);
+        }
+
+        if (this instanceof Directory) {
+            for (const child of this.getChildNodes()) {
+                for (const foundNode of child.findNodes(bn)) {
+                    result.add(foundNode);
+                }
+            }
+        }
+        return result;
+    }
 }
